@@ -18,12 +18,27 @@ def test_get_zones():
     assert "occupancy_pct" in data[0]
 
 def test_recommendation_endpoint():
+    # First, spike Gate C so a recommendation is generated
+    client.post("/api/demo/spike/gate_c")
     response = client.post("/api/recommend")
     assert response.status_code == 200
     data = response.json()
     assert "recommendations" in data
     assert "engine" in data
-    assert data["engine"] == "Local Fallback"  # since API keys are absent in tests
+    assert data["engine"] == "Local Fallback"
+    
+    if len(data["recommendations"]) > 0:
+        rec = data["recommendations"][0]
+        assert "capacity" in rec
+        assert "current_occupancy" in rec
+        assert "predicted_pct_in_5min" in rec
+        assert "congestion_growth_pct" in rec
+        assert "expected_reduction_pct" in rec
+        assert "confidence_score" in rec
+        assert "confidence_rating" in rec
+        assert "reasoning" in rec
+        assert rec["confidence_score"] > 0
+        assert len(rec["confidence_rating"]) > 0
 
 def test_chat_endpoint():
     response = client.post("/api/chat", json={"message": "What is the status of Gate C?"})
@@ -63,3 +78,28 @@ def test_websocket_stream():
         data = websocket.receive_json()
         assert len(data) == 9
         assert data[0]["id"] == "gate_a"
+
+def test_dispatch_preview_endpoint():
+    payload = {
+        "zone_id": "gate_c",
+        "alternative_routes": ["gate_b"],
+        "match_id": "argentina_saudi",
+        "action": "IMMEDIATE DIVERSION: Restrict ingress at Gate C."
+    }
+    response = client.post("/api/dispatch/preview", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "briefing" in data
+    assert "impact" in data
+    assert "languages" in data
+    assert "announcements" in data
+    assert "engine" in data
+    
+    assert "Spanish" in data["languages"]
+    assert "Arabic" in data["languages"]
+    assert "English" in data["languages"]
+    
+    assert data["impact"]["reduction_pct"] > 0
+    assert "diverted_flow_rate_per_min" in data["impact"]
+    assert data["impact"]["diverted_flow_rate_per_min"] > 0
+    assert len(data["announcements"]["Spanish"]) > 0

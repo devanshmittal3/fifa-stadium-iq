@@ -5,7 +5,10 @@ from contextlib import asynccontextmanager
 from typing import List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models import ZoneState, RecommendationResponse, ChatRequest, ChatResponse
+from models import (
+    ZoneState, RecommendationResponse, ChatRequest, ChatResponse,
+    DispatchPreviewRequest, DispatchPreviewResponse
+)
 from simulation import StadiumSimulator
 from reasoning import ReasoningEngine
 
@@ -116,9 +119,28 @@ async def post_chat(request: ChatRequest):
         history=request.history
     )
 
+@app.post("/api/dispatch/preview", response_model=DispatchPreviewResponse)
+async def post_dispatch_preview(request: DispatchPreviewRequest):
+    """Generates preview details for deploying crowd redirection."""
+    zones = simulator.get_all_zones()
+    preview_data = reasoning_engine.generate_dispatch_preview(
+        zone_id=request.zone_id,
+        action=request.action,
+        alternative_routes=request.alternative_routes,
+        match_id=request.match_id,
+        zones=zones
+    )
+    return DispatchPreviewResponse(**preview_data)
+
+from pydantic import BaseModel
+
+class RedirectionRequest(BaseModel):
+    zone_id: str
+    alternative_routes: List[str]
+
 @app.post("/api/demo/spike/{zone_id}")
 async def trigger_spike(zone_id: str):
-    """Triggers an artificial crowd ingress spike of 25% capacity in a specific zone."""
+    """Triggers an artificial crowd ingress spike of 30% capacity in a specific zone."""
     success = simulator.trigger_spike(zone_id)
     if not success:
         raise HTTPException(status_code=404, detail=f"Zone {zone_id} not found")
@@ -147,3 +169,45 @@ async def reset_simulation():
         )
         
     return {"status": "reset"}
+
+@app.get("/api/simulation/state")
+async def get_simulation_state():
+    """Retrieves current simulation metadata."""
+    return {
+        "match_stage": simulator.match_stage,
+        "demo_mode": simulator.demo_mode,
+        "active_redirections": simulator.active_redirections
+    }
+
+@app.post("/api/simulation/stage/{stage_name}")
+async def set_simulation_stage(stage_name: str):
+    """Updates the current active stage of the FIFA match lifecycle."""
+    simulator.set_stage(stage_name)
+    
+    # Broadcast updated state immediately to all websockets
+    if active_websockets:
+        payload = json.dumps([z.model_dump() for z in simulator.get_all_zones()])
+        await asyncio.gather(
+            *[ws.send_text(payload) for ws in active_websockets],
+            return_exceptions=True
+        )
+        
+    return {"status": "stage_updated", "stage": simulator.match_stage}
+
+@app.post("/api/simulation/demo/{enabled}")
+async def set_demo_mode(enabled: bool):
+    """Toggles automatic stage progression demo loop."""
+    simulator.set_demo_mode(enabled)
+    return {"status": "demo_mode_updated", "enabled": simulator.demo_mode}
+
+@app.post("/api/simulation/redirection/activate")
+async def activate_redirection(req: RedirectionRequest):
+    """Registers an active redirection route in the simulator to mitigate congestion."""
+    simulator.activate_redirection(req.zone_id, req.alternative_routes)
+    return {"status": "redirection_activated", "zone_id": req.zone_id, "alternative_routes": req.alternative_routes}
+
+@app.post("/api/simulation/redirection/deactivate/{zone_id}")
+async def deactivate_redirection(zone_id: str):
+    """Deactivates a redirection route in the simulator."""
+    simulator.deactivate_redirection(zone_id)
+    return {"status": "redirection_deactivated", "zone_id": zone_id}

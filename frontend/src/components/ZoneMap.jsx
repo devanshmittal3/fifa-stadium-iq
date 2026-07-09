@@ -27,20 +27,46 @@ const CONNECTIONS = [
   { from: "stairwell_south", to: "seating_west" },
 ];
 
-export function ZoneMap({ zones, selectedZoneId, onSelectZone }) {
-  // Helper to get status class from zone state
-  const getZoneStatus = (zoneId) => {
-    const zone = zones.find((z) => z.id === zoneId);
-    return zone ? zone.status : "normal";
+export function ZoneMap({ 
+  zones, 
+  selectedZoneId, 
+  onSelectZone, 
+  activeRedirections = {},
+  predictionMode = "current",
+  setPredictionMode
+}) {
+  const getZoneData = (zoneId) => {
+    const zone = (zones || []).find((z) => z.id === zoneId);
+    if (!zone) return {};
+    
+    let occupancy_pct = zone.occupancy_pct;
+    if (predictionMode === "5min") {
+      occupancy_pct = zone.predicted_pct_in_5min !== undefined ? zone.predicted_pct_in_5min : zone.predicted_pct_in_2min;
+    } else if (predictionMode === "10min") {
+      occupancy_pct = zone.predicted_pct_in_10min !== undefined ? zone.predicted_pct_in_10min : occupancy_pct;
+    }
+    
+    let status = zone.status;
+    if (predictionMode !== "current") {
+      if (occupancy_pct >= 90) status = "critical";
+      else if (occupancy_pct >= 75) status = "watch";
+      else status = "normal";
+    }
+    
+    return {
+      ...zone,
+      occupancy_pct,
+      status
+    };
   };
 
-  const getZoneData = (zoneId) => {
-    return zones.find((z) => z.id === zoneId) || {};
+  const getZoneStatus = (zoneId) => {
+    return getZoneData(zoneId).status || "normal";
   };
 
   return (
     <div className="glass-panel" style={{ height: "100%" }}>
-      <div className="panel-header">
+      <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -48,6 +74,30 @@ export function ZoneMap({ zones, selectedZoneId, onSelectZone }) {
           </svg>
           Stadium Ingress & Flow Topology
         </h2>
+        
+        {/* Prediction Layer Selection */}
+        <div style={{ display: "flex", gap: "4px", background: "rgba(0, 0, 0, 0.4)", padding: "2px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+          {["current", "5min", "10min"].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setPredictionMode(mode)}
+              className="chat-submit-btn"
+              style={{
+                padding: "3px 8px",
+                fontSize: "0.68rem",
+                height: "auto",
+                background: predictionMode === mode ? "var(--color-primary-light)" : "transparent",
+                borderColor: predictionMode === mode ? "var(--color-primary)" : "transparent",
+                color: predictionMode === mode ? "#fff" : "var(--color-text-secondary)",
+                borderRadius: "4px",
+                fontWeight: "700"
+              }}
+              aria-label={`Switch heatmap to ${mode === "current" ? "current occupancy" : mode === "5min" ? "5-minute prediction" : "10-minute prediction"}`}
+            >
+              {mode === "current" ? "Current" : mode === "5min" ? "+5 Min" : "+10 Min"}
+            </button>
+          ))}
+        </div>
       </div>
       
       <div className="panel-content" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -59,6 +109,18 @@ export function ZoneMap({ zones, selectedZoneId, onSelectZone }) {
                 <feGaussianBlur stdDeviation="6" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
+              {/* Blue redirection arrow head marker */}
+              <marker 
+                id="arrow-blue" 
+                viewBox="0 0 10 10" 
+                refX="22" 
+                refY="5" 
+                markerWidth="5" 
+                markerHeight="5" 
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#00f0ff" />
+              </marker>
             </defs>
 
             {/* Connection Links (Spectator Flow Paths) */}
@@ -90,10 +152,117 @@ export function ZoneMap({ zones, selectedZoneId, onSelectZone }) {
               );
             })}
 
+            {/* Active Diversion Overlay Routes */}
+            {Object.entries(activeRedirections || {}).map(([fromId, redirectionData]) => {
+              if (!redirectionData) return null;
+              const routes = redirectionData.routes || [];
+              const flowRate = redirectionData.flowRate || 350;
+              return routes.map((toId, lIdx) => {
+                const fromNode = NODE_LAYOUT[fromId];
+                const toNode = NODE_LAYOUT[toId];
+                if (!fromNode || !toNode) return null;
+
+                // For vertical paths (like A -> B, C -> B), curve left
+                // For other paths, curve up/down based on relative positions
+                let cx = (fromNode.x + toNode.x) / 2;
+                let cy = (fromNode.y + toNode.y) / 2;
+                if (fromNode.x === 80 && toNode.x === 80) {
+                  cx = 15; // external perimeter arc to the left
+                } else {
+                  cx = cx + 25;
+                  cy = cy - 35;
+                }
+
+                const pathD = `M ${fromNode.x} ${fromNode.y} Q ${cx} ${cy} ${toNode.x} ${toNode.y}`;
+                
+                const fromLabel = fromId.replace("gate_", "Gate ").replace("_", " ").toUpperCase();
+                const toLabel = toId.replace("concourse_", "Concourse ").replace("seating_", "Seating ").replace("stairwell_", "Stairwell ").replace("_", " ").toUpperCase();
+                const cardX = (fromNode.x === 80 && toNode.x === 80) ? 35 : cx - 85;
+                const cardY = cy - 17;
+
+                return (
+                  <g key={`redirect-${fromId}-${toId}-${lIdx}`} style={{ pointerEvents: "none" }}>
+                    {/* Underlying thick blue glow line */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="#00f0ff"
+                      strokeWidth="5"
+                      opacity="0.2"
+                    />
+                    {/* Animated dashed path line */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="#00f0ff"
+                      strokeWidth="2.5"
+                      strokeDasharray="6, 4"
+                      markerEnd="url(#arrow-blue)"
+                      className="redirect-path-animated"
+                    />
+                    
+                    {/* Continuous moving flow particles (3 offset circles) */}
+                    <circle r="4.5" fill="#00f0ff" filter="url(#glow)">
+                      <animateMotion dur="2.5s" repeatCount="indefinite" path={pathD} begin="0s" />
+                    </circle>
+                    <circle r="4.5" fill="#00f0ff" filter="url(#glow)">
+                      <animateMotion dur="2.5s" repeatCount="indefinite" path={pathD} begin="0.83s" />
+                    </circle>
+                    <circle r="4.5" fill="#00f0ff" filter="url(#glow)">
+                      <animateMotion dur="2.5s" repeatCount="indefinite" path={pathD} begin="1.67s" />
+                    </circle>
+
+                    {/* Glowing active route status label card at midpoint */}
+                    <g transform={`translate(${cardX}, ${cardY})`}>
+                      <rect
+                        width="170"
+                        height="34"
+                        rx="6"
+                        fill="rgba(10, 14, 26, 0.95)"
+                        stroke="#00f0ff"
+                        strokeWidth="1.5"
+                        style={{ filter: "drop-shadow(0px 0px 6px rgba(0, 240, 255, 0.5))" }}
+                      />
+                      <text
+                        x="85"
+                        y="13"
+                        fill="#00f0ff"
+                        fontSize="7.5"
+                        fontWeight="800"
+                        textAnchor="middle"
+                        style={{ letterSpacing: "0.5px", fontFamily: "monospace" }}
+                      >
+                        {`DIVERSION: ${fromLabel} ➔ ${toLabel}`}
+                      </text>
+                      <text
+                        x="85"
+                        y="26"
+                        fill="#00e676"
+                        fontSize="7.5"
+                        fontWeight="700"
+                        textAnchor="middle"
+                        style={{ letterSpacing: "0.3px", fontFamily: "monospace" }}
+                      >
+                        {`Flow: ~${flowRate} spectators/min`}
+                      </text>
+                    </g>
+                  </g>
+                );
+              });
+            })}
+
             {/* Stadium Zones (Interactive Nodes) */}
             {Object.entries(NODE_LAYOUT).map(([id, layout]) => {
               const z = getZoneData(id);
-              const status = z.status || "normal";
+              let status = z.status || "normal";
+              
+              // Color nodes blue if they are active redirect sources or targets
+              const isRedirectSrc = !!activeRedirections[id];
+              const isRedirectTarget = Object.values(activeRedirections).some(data => data && data.routes && data.routes.includes(id));
+              if (isRedirectSrc || isRedirectTarget) {
+                status = "redirected";
+              }
+              
               const isSelected = selectedZoneId === id;
               
               return (
@@ -164,19 +333,27 @@ export function ZoneMap({ zones, selectedZoneId, onSelectZone }) {
           {selectedZoneId ? (
             (() => {
               const zone = getZoneData(selectedZoneId);
+              if (!zone || !zone.id) {
+                return (
+                  <div style={{ color: "var(--color-text-muted)", fontSize: "0.85rem", textAlign: "center", paddingTop: "16px" }}>
+                    Select a node on the map to inspect live flow statistics.
+                  </div>
+                );
+              }
+              const trend = zone.trend_per_min !== undefined ? zone.trend_per_min : 0;
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontWeight: "600", fontSize: "0.95rem" }}>{zone.name}</span>
-                    <span className={`status-badge-inline ${zone.status}`}>
-                      {zone.status}
+                    <span style={{ fontWeight: "600", fontSize: "0.95rem" }}>{zone.name || selectedZoneId}</span>
+                    <span className={`status-badge-inline ${zone.status || "normal"}`}>
+                      {zone.status || "normal"}
                     </span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>
-                    <span>Occupancy: {zone.current_occupancy} / {zone.capacity}</span>
-                    <span>Trend: <strong style={{ color: zone.trend_per_min > 0 ? "var(--color-danger)" : zone.trend_per_min < 0 ? "var(--color-success)" : "var(--color-text-muted)" }}>{zone.trend_per_min > 0 ? "+" : ""}{zone.trend_per_min}%/min</strong></span>
+                    <span>Occupancy: {zone.current_occupancy || 0} / {zone.capacity || 0}</span>
+                    <span>Trend: <strong style={{ color: trend > 0 ? "var(--color-danger)" : trend < 0 ? "var(--color-success)" : "var(--color-text-muted)" }}>{trend > 0 ? "+" : ""}{trend.toFixed(1)}%/min</strong></span>
                   </div>
-                  {zone.breach_countdown_min !== null && (
+                  {zone.breach_countdown_min !== undefined && zone.breach_countdown_min !== null && (
                     <div style={{ fontSize: "0.8rem", color: "var(--color-danger)", fontWeight: "600", marginTop: "2px" }}>
                       ⚠️ Est. Safety Breach Countdown: {zone.breach_countdown_min} min
                     </div>
