@@ -12,6 +12,21 @@ logger = logging.getLogger("stadiumiq.reasoning")
 
 class ReasoningEngine:
     def __init__(self):
+        # Load local .env manually if it exists and not in unit testing
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+        import sys
+        if os.path.exists(env_path) and "pytest" not in sys.modules:
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            parts = line.split("=", 1)
+                            if len(parts) == 2:
+                                os.environ[parts[0].strip()] = parts[1].strip()
+            except Exception as e:
+                logger.error(f"Error loading .env file: {e}")
+
         self.anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
         self.gemini_key = os.environ.get("GEMINI_API_KEY")
         

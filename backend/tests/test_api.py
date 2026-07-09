@@ -1,3 +1,8 @@
+import os
+# Mock API keys to ensure tests always run against the Local Fallback engine
+os.environ["ANTHROPIC_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = ""
+
 import pytest
 from fastapi.testclient import TestClient
 from main import app
