@@ -85,7 +85,7 @@ export function RecommendationPanel({ recommendations, engine, isLoading, onRefr
                       <span>Divert Paths:</span>
                       {rec.alternative_routes.map((route) => (
                         <span key={route} className="alt-route-tag">
-                          {route.replace("_", " ").title || route}
+                          {route.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                         </span>
                       ))}
                     </div>
