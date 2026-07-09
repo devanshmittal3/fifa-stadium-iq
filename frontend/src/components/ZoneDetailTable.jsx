@@ -43,6 +43,16 @@ export function ZoneDetailTable({ zones, selectedZoneId, onSelectZone, activeRed
                         cursor: "pointer"
                       }}
                       onClick={() => onSelectZone(zone.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectZone(zone.id);
+                        }
+                      }}
+                      tabIndex="0"
+                      role="button"
+                      aria-pressed={isSelected}
+                      aria-label={`${zone.name}, occupancy ${Math.round(zone.occupancy_pct)}%, status: ${zone.status}`}
                     >
                       <td style={{ fontWeight: "500" }}>{zone.name}</td>
                       <td>
