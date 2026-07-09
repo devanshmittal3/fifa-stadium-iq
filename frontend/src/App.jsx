@@ -10,8 +10,8 @@ import { Dashboard } from "./components/Dashboard";
 import { AccessibilityControlCenter } from "./components/AccessibilityControlCenter";
 import "./styles.css";
 
-const BACKEND_URL = "http://localhost:8000";
-const WS_URL = "ws://localhost:8000/ws/zones";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+const WS_URL = import.meta.env.VITE_WS_URL || (BACKEND_URL.startsWith("https") ? BACKEND_URL.replace("https://", "wss://") : BACKEND_URL.replace("http://", "ws://")) + "/ws/zones";
 
 const MATCHES = [
   { id: "argentina_saudi", label: "🇦🇷 Argentina vs. Saudi Arabia (Arabic/Spanish)" },
@@ -667,6 +667,7 @@ function App() {
               activeRedirections={activeRedirections}
               onDispatch={handleDispatchRedirection}
               onDeactivate={handleDeactivateRedirection}
+              backendUrl={BACKEND_URL}
             />
           </div>
           <div style={{ flex: 1, minHeight: "0" }}>

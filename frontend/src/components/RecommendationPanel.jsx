@@ -8,7 +8,8 @@ export function RecommendationPanel({
   activeMatch, 
   activeRedirections, 
   onDispatch, 
-  onDeactivate 
+  onDeactivate,
+  backendUrl = "http://localhost:8000"
 }) {
   const [selectedRec, setSelectedRec] = useState(null);
   const [expandedAlts, setExpandedAlts] = useState({});
@@ -49,7 +50,7 @@ export function RecommendationPanel({
     setDeploymentStep(0);
 
     try {
-      const response = await fetch("http://localhost:8000/api/dispatch/preview", {
+      const response = await fetch(`${backendUrl}/api/dispatch/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
