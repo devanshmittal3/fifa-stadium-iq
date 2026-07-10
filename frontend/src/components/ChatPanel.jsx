@@ -139,56 +139,55 @@ export function ChatPanel({
   };
 
   return (
-    <div className="copilot-sidebar" style={{ display: "flex", flexDirection: "column", gap: "20px", height: "100%" }}>
+    <div className="copilot-sidebar">
       
       {/* 1. Current Match Information */}
-      <div className="glass-panel" style={{ padding: "14px 16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-          <span style={{ fontSize: "0.68rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
+      <div className="glass-panel" style={{ padding: "10px 14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ fontSize: "0.65rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
             🏟️ Match Operations Status
           </span>
-          <span style={{ fontSize: "0.65rem", background: "rgba(0, 176, 255, 0.15)", color: "#00f0ff", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+          <span style={{ fontSize: "0.6rem", background: "rgba(0, 176, 255, 0.15)", color: "#00f0ff", padding: "1px 5px", borderRadius: "4px", fontWeight: "700" }}>
             LIVE
           </span>
         </div>
-        <h3 style={{ fontSize: "0.92rem", fontWeight: "700", color: "#fff", marginBottom: "6px" }}>
-          {getMatchName(activeMatch)}
-        </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: "8px", fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
-          <div>Phase: <strong style={{ color: "#fff" }}>{getMatchStageLabel(simulationState?.match_stage)}</strong></div>
-          <div>Occupancy: <strong style={{ color: "#fff" }}>{Math.round(occupancyPct)}%</strong></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: "700", color: "#fff", margin: 0 }}>
+            {getMatchName(activeMatch)}
+          </h3>
+          <span style={{ fontSize: "0.72rem", color: "var(--color-text-secondary)" }}>Occ: <strong style={{ color: "#fff" }}>{Math.round(occupancyPct)}%</strong></span>
         </div>
-        
-        {/* Simple Progress Bar */}
-        <div style={{ height: "4px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", marginTop: "8px", overflow: "hidden" }}>
-          <div style={{ width: `${occupancyPct}%`, height: "100%", background: "linear-gradient(90deg, #00b0ff, #00e676)", borderRadius: "2px" }}></div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--color-text-secondary)" }}>Phase: <strong style={{ color: "#fff" }}>{getMatchStageLabel(simulationState?.match_stage)}</strong></span>
+          <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", overflow: "hidden" }}>
+            <div style={{ width: `${occupancyPct}%`, height: "100%", background: "linear-gradient(90deg, #00b0ff, #00e676)", borderRadius: "2px" }}></div>
+          </div>
         </div>
       </div>
 
       {/* 2. AI Health Monitor */}
-      <div className="glass-panel" style={{ padding: "12px 16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-          <span style={{ fontSize: "0.68rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
-            🖥️ AI System Telemetry & Health
+      <div className="glass-panel" style={{ padding: "8px 14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ fontSize: "0.63rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
+            🖥️ AI Health
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: isConnected ? "var(--color-success)" : "var(--color-danger)", display: "inline-block", boxShadow: isConnected ? "0 0 6px var(--color-success)" : "none" }}></span>
-            <span style={{ fontSize: "0.65rem", color: isConnected ? "var(--color-success)" : "var(--color-danger)", fontWeight: "700" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: isConnected ? "var(--color-success)" : "var(--color-danger)", display: "inline-block", boxShadow: isConnected ? "0 0 6px var(--color-success)" : "none" }}></span>
+            <span style={{ fontSize: "0.6rem", color: isConnected ? "var(--color-success)" : "var(--color-danger)", fontWeight: "700" }}>
               {isConnected ? "ONLINE" : "OFFLINE"}
             </span>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: "6px 12px", fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
-          <div>Engine: <strong style={{ color: "#00b0ff" }}>{recsEngine || "Local Fallback"}</strong></div>
-          <div>Telemetry RSS: <strong style={{ color: "var(--color-success)" }}>Nominal</strong></div>
-          <div>API Latency: <strong style={{ color: "#fff" }}>{isConnected ? "42ms" : "N/A"}</strong></div>
-          <div>Anomaly Filter: <strong style={{ color: "var(--color-success)" }}>Active (0 errors)</strong></div>
+        <div style={{ display: "flex", gap: "12px", fontSize: "0.7rem", color: "var(--color-text-secondary)", flexWrap: "wrap" }}>
+          <span>Engine: <strong style={{ color: "#00b0ff" }}>{recsEngine || "Local Fallback"}</strong></span>
+          <span>Latency: <strong style={{ color: "#fff" }}>{isConnected ? "42ms" : "N/A"}</strong></span>
+          <span>Status: <strong style={{ color: "var(--color-success)" }}>Nominal</strong></span>
         </div>
       </div>
 
       {/* 3. Incident Timeline */}
-      <div className="glass-panel" style={{ padding: "14px 16px" }}>
-        <h4 style={{ fontSize: "0.7rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+      <div className="glass-panel" style={{ padding: "8px 14px" }}>
+        <h4 style={{ fontSize: "0.65rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
           <span>⚡</span> Active AI Operational Timelines
         </h4>
         
@@ -219,21 +218,21 @@ export function ChatPanel({
       </div>
 
       {/* 4. AI Copilot Chat Card (Stretches to consume remaining space) */}
-      <div className="glass-panel" style={{ flex: 1, minHeight: "0", display: "flex", flexDirection: "column" }}>
+      <div className="glass-panel" style={{ minHeight: "0" }}>
         
         {/* Toggle headers inside Chat panel */}
-        <div style={{ display: "flex", width: "100%", borderBottom: "1px solid var(--border-light)" }}>
+        <div style={{ display: "flex", width: "100%", borderBottom: "1px solid var(--border-light)", flexShrink: 0 }}>
           <button
             onClick={() => setActiveSubTab("chat")}
             style={{
               flex: 1,
-              padding: "10px",
+              padding: "8px",
               background: "transparent",
               border: "none",
               borderBottom: activeSubTab === "chat" ? "2px solid var(--color-primary)" : "none",
               color: activeSubTab === "chat" ? "var(--color-primary)" : "var(--color-text-secondary)",
               fontWeight: "700",
-              fontSize: "0.75rem",
+              fontSize: "0.72rem",
               cursor: "pointer",
               transition: "all 0.2s"
             }}
@@ -244,13 +243,13 @@ export function ChatPanel({
             onClick={() => setActiveSubTab("reports")}
             style={{
               flex: 1,
-              padding: "10px",
+              padding: "8px",
               background: "transparent",
               border: "none",
               borderBottom: activeSubTab === "reports" ? "2px solid var(--color-primary)" : "none",
               color: activeSubTab === "reports" ? "var(--color-primary)" : "var(--color-text-secondary)",
               fontWeight: "700",
-              fontSize: "0.75rem",
+              fontSize: "0.72rem",
               cursor: "pointer",
               transition: "all 0.2s"
             }}
@@ -259,11 +258,11 @@ export function ChatPanel({
           </button>
         </div>
 
-        <div className="panel-content" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", padding: "12px 14px", minHeight: "0" }}>
+        <div className="panel-content" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", padding: "8px 12px", minHeight: "0" }}>
           
           {/* SubTab 1: Chat interface */}
           {activeSubTab === "chat" && (
-            <div className="chat-container" style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+            <div className="chat-container" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
               <div className="chat-history" style={{ flex: 1, overflowY: "auto", paddingRight: "4px" }}>
                 {chatHistory.length === 0 ? (
                   <div style={{ color: "var(--color-text-muted)", fontSize: "0.8rem", textAlign: "center", padding: "30px 10px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
