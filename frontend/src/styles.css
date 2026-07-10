@@ -233,6 +233,19 @@ body {
     padding: 12px;
     gap: 12px;
   }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .header-status {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .match-selector-select {
+    max-width: 100%;
+  }
   .dashboard-grid {
     gap: 12px;
   }
@@ -244,7 +257,18 @@ body {
     min-height: auto;
   }
   .copilot-sidebar-container {
-    height: 550px;
+    height: auto;
+    min-height: 500px;
+  }
+  /* Force inline 2-column grids to 1 column on mobile */
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns: 1.1fr 1fr"],
+  [style*="gridTemplateColumns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="gridColumn: span 2"],
+  [style*="grid-column: span 2"] {
+    grid-column: span 1 !important;
   }
 }
 
