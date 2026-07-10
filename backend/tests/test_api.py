@@ -103,3 +103,47 @@ def test_dispatch_preview_endpoint():
     assert "diverted_flow_rate_per_min" in data["impact"]
     assert data["impact"]["diverted_flow_rate_per_min"] > 0
     assert len(data["announcements"]["Spanish"]) > 0
+
+def test_simulation_state():
+    response = client.get("/api/simulation/state")
+    assert response.status_code == 200
+    data = response.json()
+    assert "match_stage" in data
+    assert "demo_mode" in data
+    assert "active_redirections" in data
+
+def test_set_simulation_stage():
+    response = client.post("/api/simulation/stage/kickoff")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "stage_updated"
+    assert data["stage"] == "kickoff"
+
+def test_set_demo_mode():
+    response = client.post("/api/simulation/demo/true")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "demo_mode_updated"
+    assert data["enabled"] is True
+    
+    # revert
+    client.post("/api/simulation/demo/false")
+
+def test_redirection_endpoints():
+    payload = {
+        "zone_id": "gate_c",
+        "alternative_routes": ["gate_b"]
+    }
+    response = client.post("/api/simulation/redirection/activate", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "redirection_activated"
+    assert data["zone_id"] == "gate_c"
+    
+    # check state
+    state_response = client.get("/api/simulation/state")
+    assert "gate_c" in state_response.json()["active_redirections"]
+    
+    deact_response = client.post("/api/simulation/redirection/deactivate/gate_c")
+    assert deact_response.status_code == 200
+    assert deact_response.json()["status"] == "redirection_deactivated"

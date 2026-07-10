@@ -22,13 +22,14 @@
 3. [Key Features](#-key-features)
 4. [System Architecture & AI Workflow](#-system-architecture--ai-workflow)
 5. [Tech Stack](#-tech-stack)
-6. [Folder Structure](#-folder-structure)
-7. [Installation & Setup](#-installation--setup)
-8. [API & Configuration](#-api--configuration)
-9. [Running the Application](#-running-the-application)
-10. [Evaluation & Demo Guide](#-evaluation--demo-guide)
-11. [Future Improvements](#-future-improvements)
-12. [License](#-license)
+6. [Screenshots](#-screenshots)
+7. [Folder Structure](#-folder-structure)
+8. [Installation & Setup](#-installation--setup)
+9. [API & Configuration](#-api--configuration)
+10. [Running the Application](#-running-the-application)
+11. [Evaluation & Demo Guide](#-evaluation--demo-guide)
+12. [Future Improvements](#-future-improvements)
+13. [License](#-license)
 
 ---
 
@@ -89,6 +90,12 @@ StadiumIQ addresses these challenges by transforming raw spectator telemetry int
 
 ## 🏗️ System Architecture & AI Workflow
 
+### Architecture Diagram
+![System Architecture](docs/architecture.png)
+
+### AI Workflow
+![Incident Response Workflow](docs/workflow.png)
+
 ### Data Flow & Component Mapping
 ```mermaid
 graph TD
@@ -130,6 +137,20 @@ graph TD
 * **Backend**: Python 3.10+, FastAPI, Pydantic, Uvicorn.
 * **AI Core**: Official Anthropic SDK (`anthropic`), Google Generative AI SDK (`google-generativeai`).
 * **Unit Testing**: Pytest, Asyncio-test.
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Executive Dashboard" width="48%">
+  <img src="docs/screenshots/heatmap.png" alt="Heatmap Visualization" width="48%">
+</div>
+<br/>
+<div align="center">
+  <img src="docs/screenshots/ai-decision.png" alt="AI Decision Panel" width="48%">
+  <img src="docs/screenshots/replay.png" alt="Incident Replay Timeline" width="48%">
+</div>
 
 ---
 
@@ -238,6 +259,10 @@ Open **[http://localhost:5173](http://localhost:5173)** in your web browser.
 ---
 
 ## 📖 Evaluation & Demo Guide
+
+### Demo Video
+Please check out our full feature walkthrough video located at:
+**[demo/stadiumiq-demo.mp4](demo/stadiumiq-demo.mp4)**
 
 Follow these steps to experience the complete operations control workflow:
 

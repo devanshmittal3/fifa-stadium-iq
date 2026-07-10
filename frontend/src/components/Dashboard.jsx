@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
-export function Dashboard({
+export const Dashboard = React.memo(function Dashboard({
   zones = [],
   recommendations = [],
   activeRedirections = {},
@@ -14,12 +14,32 @@ export function Dashboard({
   const [pulseStates, setPulseStates] = useState({});
 
   // Compute overall safety score
-  const totalSpectators = zones.reduce((sum, z) => sum + (z.current_occupancy || 0), 0);
-  const activeZoneCount = zones.length;
-  const criticalZoneCount = zones.filter(z => z.status === "critical").length;
-  const watchZoneCount = zones.filter(z => z.status === "watch").length;
-  const activeDiversionsCount = Object.keys(activeRedirections).length;
-  const recsCount = recommendations.length;
+  const metrics = useMemo(() => {
+    const totalSpectators = zones.reduce((sum, z) => sum + (z.current_occupancy || 0), 0);
+    const activeZoneCount = zones.length;
+    const criticalZoneCount = zones.filter(z => z.status === "critical").length;
+    const watchZoneCount = zones.filter(z => z.status === "watch").length;
+    const activeDiversionsCount = Object.keys(activeRedirections).length;
+    const recsCount = recommendations.length;
+    
+    return {
+      totalSpectators,
+      activeZoneCount,
+      criticalZoneCount,
+      watchZoneCount,
+      activeDiversionsCount,
+      recsCount
+    };
+  }, [zones, activeRedirections, recommendations.length]);
+
+  const {
+    totalSpectators,
+    activeZoneCount,
+    criticalZoneCount,
+    watchZoneCount,
+    activeDiversionsCount,
+    recsCount
+  } = metrics;
 
   useEffect(() => {
     let score = 100;
@@ -245,4 +265,4 @@ export function Dashboard({
       </div>
     </div>
   );
-}
+});

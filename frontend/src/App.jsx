@@ -77,7 +77,7 @@ function App() {
   }, [liveZones]);
 
   // Demo Controls callbacks
-  const handleToggleDemoMode = async (enabled) => {
+  const handleToggleDemoMode = useCallback(async (enabled) => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/simulation/demo/${enabled}`, {
         method: "POST"
@@ -88,9 +88,9 @@ function App() {
     } catch (err) {
       console.error("Error setting demo mode:", err);
     }
-  };
+  }, []);
 
-  const handleSetSimulationStage = async (stageName) => {
+  const handleSetSimulationStage = useCallback(async (stageName) => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/simulation/stage/${stageName}`, {
         method: "POST"
@@ -108,7 +108,7 @@ function App() {
     } catch (err) {
       console.error("Error setting simulation stage:", err);
     }
-  };
+  }, []);
 
   // Replay Mode snapshot logic
   const getReplayZones = () => {
@@ -365,7 +365,7 @@ function App() {
   }, [alertZonesStr, isConnected, fetchRecommendations, activeReplay]);
 
   // Handle Q&A send message
-  const handleSendMessage = async (messageText) => {
+  const handleSendMessage = useCallback(async (messageText) => {
     const newOperatorMsg = { sender: "operator", text: messageText };
     setChatHistory((prev) => [...prev, newOperatorMsg]);
     setIsChatLoading(true);
@@ -415,10 +415,10 @@ function App() {
     } finally {
       setIsChatLoading(false);
     }
-  };
+  }, [chatHistory]);
 
   // Dispatch redirection active control
-  const handleDispatchRedirection = (zoneId, targetRouteIds, impactString, actionText, flowRate, languages, occupancyPct) => {
+  const handleDispatchRedirection = useCallback((zoneId, targetRouteIds, impactString, actionText, flowRate, languages, occupancyPct) => {
     setActiveRedirections((prev) => ({
       ...prev,
       [zoneId]: {
@@ -452,10 +452,10 @@ function App() {
         engine: "System Orchestrator",
       },
     ]);
-  };
+  }, [zones]);
 
   // Deactivate active redirection
-  const handleDeactivateRedirection = (zoneId) => {
+  const handleDeactivateRedirection = useCallback((zoneId) => {
     setActiveRedirections((prev) => {
       const copy = { ...prev };
       delete copy[zoneId];
@@ -479,10 +479,10 @@ function App() {
         engine: "System Orchestrator",
       },
     ]);
-  };
+  }, [zones]);
 
   // Handle Demo Spike
-  const handleTriggerSpike = async (zoneId) => {
+  const handleTriggerSpike = useCallback(async (zoneId) => {
     setIsActionLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/api/demo/spike/${zoneId}`, {
@@ -498,10 +498,10 @@ function App() {
     } finally {
       setIsActionLoading(false);
     }
-  };
+  }, []);
 
   // Handle Demo Reset
-  const handleReset = async () => {
+  const handleReset = useCallback(async () => {
     setIsActionLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/api/demo/reset`, {
@@ -525,7 +525,7 @@ function App() {
     } finally {
       setIsActionLoading(false);
     }
-  };
+  }, []);
 
   return (
     <div className="app-container">

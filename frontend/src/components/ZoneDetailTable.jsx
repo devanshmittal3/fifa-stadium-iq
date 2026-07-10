@@ -1,6 +1,6 @@
 import React from "react";
 
-export function ZoneDetailTable({ zones, selectedZoneId, onSelectZone, activeRedirections = {} }) {
+export const ZoneDetailTable = React.memo(function ZoneDetailTable({ zones, selectedZoneId, onSelectZone, activeRedirections = {} }) {
   return (
     <div className="glass-panel" style={{ height: "100%" }}>
       <div className="panel-header">
@@ -120,4 +120,4 @@ export function ZoneDetailTable({ zones, selectedZoneId, onSelectZone, activeRed
       </div>
     </div>
   );
-}
+});

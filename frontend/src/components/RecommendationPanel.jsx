@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 
-export function RecommendationPanel({ 
+export const RecommendationPanel = React.memo(function RecommendationPanel({ 
   recommendations, 
   engine, 
   isLoading, 
@@ -41,7 +41,7 @@ export function RecommendationPanel({
   };
 
   // Open wizard and fetch AI Preview data
-  const handleOpenWizard = async (rec) => {
+  const handleOpenWizard = useCallback(async (rec) => {
     setSelectedRec(rec);
     setWizardStep(1);
     setPreviewData(null);
@@ -106,9 +106,9 @@ export function RecommendationPanel({
     } finally {
       setIsPreviewLoading(false);
     }
-  };
+  }, [activeMatch, backendUrl]);
 
-  const handleExecuteDispatch = () => {
+  const handleExecuteDispatch = useCallback(() => {
     if (selectedRec && previewData) {
       setDeploymentStep(7); // Start step 7 -> 8 -> 9 -> 10 simulation
       
@@ -141,15 +141,15 @@ export function RecommendationPanel({
         }, 600);
       }, 600);
     }
-  };
+  }, [selectedRec, previewData, onDispatch]);
 
-  const handleCloseWizard = () => {
+  const handleCloseWizard = useCallback(() => {
     if (deploymentStep > 0) return; // Prevent closing while dispatching
     setSelectedRec(null);
     setPreviewData(null);
     setWizardStep(1);
     setDeploymentStep(0);
-  };
+  }, [deploymentStep]);
 
   return (
     <div className="glass-panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -650,7 +650,7 @@ export function RecommendationPanel({
       )}
     </div>
   );
-}
+});
 
 // Modal and spinner animation inline definitions
 const modalOverlayStyle = {

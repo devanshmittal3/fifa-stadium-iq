@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-export function ChatPanel({
+export const ChatPanel = React.memo(function ChatPanel({
   chatHistory,
   onSendMessage,
   isLoading,
@@ -362,4 +362,4 @@ export function ChatPanel({
 
     </div>
   );
-}
+});

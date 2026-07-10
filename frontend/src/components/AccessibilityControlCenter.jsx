@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export function AccessibilityControlCenter() {
+export const AccessibilityControlCenter = React.memo(function AccessibilityControlCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(() => localStorage.getItem("access-highcontrast") === "true");
   const [largeText, setLargeText] = useState(() => localStorage.getItem("access-largetext") === "true");
@@ -183,4 +183,4 @@ export function AccessibilityControlCenter() {
       </div>
     </>
   );
-}
+});

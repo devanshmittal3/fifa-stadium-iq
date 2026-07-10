@@ -7,7 +7,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import (
     ZoneState, RecommendationResponse, ChatRequest, ChatResponse,
-    DispatchPreviewRequest, DispatchPreviewResponse
+    DispatchPreviewRequest, DispatchPreviewResponse,
+    SpikeResponse, ResetResponse, SimulationStateResponse,
+    StageUpdateResponse, DemoModeUpdateResponse,
+    RedirectionActivationResponse, RedirectionDeactivationResponse
 )
 from simulation import StadiumSimulator
 from reasoning import ReasoningEngine
@@ -138,7 +141,7 @@ class RedirectionRequest(BaseModel):
     zone_id: str
     alternative_routes: List[str]
 
-@app.post("/api/demo/spike/{zone_id}")
+@app.post("/api/demo/spike/{zone_id}", response_model=SpikeResponse)
 async def trigger_spike(zone_id: str):
     """Triggers an artificial crowd ingress spike of 30% capacity in a specific zone."""
     success = simulator.trigger_spike(zone_id)
@@ -155,7 +158,7 @@ async def trigger_spike(zone_id: str):
         
     return {"status": "spiked", "zone_id": zone_id, "zone": simulator.zones[zone_id].model_dump()}
 
-@app.post("/api/demo/reset")
+@app.post("/api/demo/reset", response_model=ResetResponse)
 async def reset_simulation():
     """Resets simulator to original baseline configurations."""
     simulator.reset()
@@ -170,7 +173,7 @@ async def reset_simulation():
         
     return {"status": "reset"}
 
-@app.get("/api/simulation/state")
+@app.get("/api/simulation/state", response_model=SimulationStateResponse)
 async def get_simulation_state():
     """Retrieves current simulation metadata."""
     return {
@@ -179,7 +182,7 @@ async def get_simulation_state():
         "active_redirections": simulator.active_redirections
     }
 
-@app.post("/api/simulation/stage/{stage_name}")
+@app.post("/api/simulation/stage/{stage_name}", response_model=StageUpdateResponse)
 async def set_simulation_stage(stage_name: str):
     """Updates the current active stage of the FIFA match lifecycle."""
     simulator.set_stage(stage_name)
@@ -194,19 +197,19 @@ async def set_simulation_stage(stage_name: str):
         
     return {"status": "stage_updated", "stage": simulator.match_stage}
 
-@app.post("/api/simulation/demo/{enabled}")
+@app.post("/api/simulation/demo/{enabled}", response_model=DemoModeUpdateResponse)
 async def set_demo_mode(enabled: bool):
     """Toggles automatic stage progression demo loop."""
     simulator.set_demo_mode(enabled)
     return {"status": "demo_mode_updated", "enabled": simulator.demo_mode}
 
-@app.post("/api/simulation/redirection/activate")
+@app.post("/api/simulation/redirection/activate", response_model=RedirectionActivationResponse)
 async def activate_redirection(req: RedirectionRequest):
     """Registers an active redirection route in the simulator to mitigate congestion."""
     simulator.activate_redirection(req.zone_id, req.alternative_routes)
     return {"status": "redirection_activated", "zone_id": req.zone_id, "alternative_routes": req.alternative_routes}
 
-@app.post("/api/simulation/redirection/deactivate/{zone_id}")
+@app.post("/api/simulation/redirection/deactivate/{zone_id}", response_model=RedirectionDeactivationResponse)
 async def deactivate_redirection(zone_id: str):
     """Deactivates a redirection route in the simulator."""
     simulator.deactivate_redirection(zone_id)

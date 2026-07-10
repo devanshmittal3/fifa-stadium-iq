@@ -73,3 +73,33 @@ class DispatchPreviewResponse(BaseModel):
     languages: List[str] = Field(..., description="Intelligently resolved languages")
     announcements: Dict[str, str] = Field(..., description="Generated public safety announcements mapped by language")
     engine: str = Field(..., description="The reasoning engine used")
+
+class SpikeResponse(BaseModel):
+    status: str = Field(..., description="Status of the spike operation")
+    zone_id: str = Field(..., description="The zone that was spiked")
+    zone: ZoneState = Field(..., description="The updated zone state")
+
+class ResetResponse(BaseModel):
+    status: str = Field(..., description="Status of the reset operation")
+
+class SimulationStateResponse(BaseModel):
+    match_stage: str = Field(..., description="Current active stage of the match")
+    demo_mode: bool = Field(..., description="Whether demo loop is enabled")
+    active_redirections: Dict[str, List[str]] = Field(..., description="Currently active crowd redirections")
+
+class StageUpdateResponse(BaseModel):
+    status: str = Field(..., description="Status of the stage update")
+    stage: str = Field(..., description="The newly set match stage")
+
+class DemoModeUpdateResponse(BaseModel):
+    status: str = Field(..., description="Status of the demo mode update")
+    enabled: bool = Field(..., description="The newly set demo mode status")
+
+class RedirectionActivationResponse(BaseModel):
+    status: str = Field(..., description="Status of the activation")
+    zone_id: str = Field(..., description="The zone where ingress is restricted")
+    alternative_routes: List[str] = Field(..., description="The target zones for redirected flow")
+
+class RedirectionDeactivationResponse(BaseModel):
+    status: str = Field(..., description="Status of the deactivation")
+    zone_id: str = Field(..., description="The zone where redirection was lifted")

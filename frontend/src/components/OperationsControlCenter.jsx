@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export function OperationsControlCenter({
+export const OperationsControlCenter = React.memo(function OperationsControlCenter({
   zones = [],
   onTriggerSpike,
   onReset,
@@ -402,4 +402,4 @@ export function OperationsControlCenter({
       </div>
     </div>
   );
-}
+});

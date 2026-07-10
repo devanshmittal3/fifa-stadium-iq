@@ -27,7 +27,7 @@ const CONNECTIONS = [
   { from: "stairwell_south", to: "seating_west" },
 ];
 
-export function ZoneMap({ 
+export const ZoneMap = React.memo(function ZoneMap({ 
   zones, 
   selectedZoneId, 
   onSelectZone, 
@@ -370,4 +370,4 @@ export function ZoneMap({
       </div>
     </div>
   );
-}
+});
