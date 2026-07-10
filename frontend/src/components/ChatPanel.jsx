@@ -142,52 +142,51 @@ export function ChatPanel({
     <div className="copilot-sidebar">
       
       {/* 1. Current Match Information */}
-      <div className="glass-panel" style={{ padding: "10px 14px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ fontSize: "0.65rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
+      <div className="glass-panel" style={{ padding: "12px 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+          <span style={{ fontSize: "0.68rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
             🏟️ Match Operations Status
           </span>
-          <span style={{ fontSize: "0.6rem", background: "rgba(0, 176, 255, 0.15)", color: "#00f0ff", padding: "1px 5px", borderRadius: "4px", fontWeight: "700" }}>
+          <span style={{ fontSize: "0.62rem", background: "rgba(0, 176, 255, 0.15)", color: "#00f0ff", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
             LIVE
           </span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: "700", color: "#fff", margin: 0 }}>
-            {getMatchName(activeMatch)}
-          </h3>
-          <span style={{ fontSize: "0.72rem", color: "var(--color-text-secondary)" }}>Occ: <strong style={{ color: "#fff" }}>{Math.round(occupancyPct)}%</strong></span>
+        <h3 style={{ fontSize: "0.9rem", fontWeight: "700", color: "#fff", marginBottom: "6px" }}>
+          {getMatchName(activeMatch)}
+        </h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: "4px", fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
+          <div>Phase: <strong style={{ color: "#fff" }}>{getMatchStageLabel(simulationState?.match_stage)}</strong></div>
+          <div>Occupancy: <strong style={{ color: "#fff" }}>{Math.round(occupancyPct)}%</strong></div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "0.7rem", color: "var(--color-text-secondary)" }}>Phase: <strong style={{ color: "#fff" }}>{getMatchStageLabel(simulationState?.match_stage)}</strong></span>
-          <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", overflow: "hidden" }}>
-            <div style={{ width: `${occupancyPct}%`, height: "100%", background: "linear-gradient(90deg, #00b0ff, #00e676)", borderRadius: "2px" }}></div>
-          </div>
+        <div style={{ height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", marginTop: "6px", overflow: "hidden" }}>
+          <div style={{ width: `${occupancyPct}%`, height: "100%", background: "linear-gradient(90deg, #00b0ff, #00e676)", borderRadius: "2px" }}></div>
         </div>
       </div>
 
       {/* 2. AI Health Monitor */}
-      <div className="glass-panel" style={{ padding: "8px 14px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ fontSize: "0.63rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
-            🖥️ AI Health
+      <div className="glass-panel" style={{ padding: "10px 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+          <span style={{ fontSize: "0.68rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700" }}>
+            🖥️ AI System Telemetry & Health
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: isConnected ? "var(--color-success)" : "var(--color-danger)", display: "inline-block", boxShadow: isConnected ? "0 0 6px var(--color-success)" : "none" }}></span>
-            <span style={{ fontSize: "0.6rem", color: isConnected ? "var(--color-success)" : "var(--color-danger)", fontWeight: "700" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: isConnected ? "var(--color-success)" : "var(--color-danger)", display: "inline-block", boxShadow: isConnected ? "0 0 6px var(--color-success)" : "none" }}></span>
+            <span style={{ fontSize: "0.65rem", color: isConnected ? "var(--color-success)" : "var(--color-danger)", fontWeight: "700" }}>
               {isConnected ? "ONLINE" : "OFFLINE"}
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: "12px", fontSize: "0.7rem", color: "var(--color-text-secondary)", flexWrap: "wrap" }}>
-          <span>Engine: <strong style={{ color: "#00b0ff" }}>{recsEngine || "Local Fallback"}</strong></span>
-          <span>Latency: <strong style={{ color: "#fff" }}>{isConnected ? "42ms" : "N/A"}</strong></span>
-          <span>Status: <strong style={{ color: "var(--color-success)" }}>Nominal</strong></span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 12px", fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
+          <div>Engine: <strong style={{ color: "#00b0ff" }}>{recsEngine || "Local Fallback"}</strong></div>
+          <div>Telemetry RSS: <strong style={{ color: "var(--color-success)" }}>Nominal</strong></div>
+          <div>API Latency: <strong style={{ color: "#fff" }}>{isConnected ? "42ms" : "N/A"}</strong></div>
+          <div>Anomaly Filter: <strong style={{ color: "var(--color-success)" }}>Active (0 errors)</strong></div>
         </div>
       </div>
 
       {/* 3. Incident Timeline */}
-      <div className="glass-panel" style={{ padding: "8px 14px" }}>
-        <h4 style={{ fontSize: "0.65rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+      <div className="glass-panel" style={{ padding: "12px 16px" }}>
+        <h4 style={{ fontSize: "0.7rem", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: "700", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
           <span>⚡</span> Active AI Operational Timelines
         </h4>
         

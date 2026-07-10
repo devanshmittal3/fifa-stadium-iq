@@ -158,42 +158,27 @@ body {
   gap: 20px; /* 20px spacing between panels */
 }
 
-/* Right Column: AI Copilot Sidebar */
+/* Right Column: AI Copilot Sidebar — scrollable */
 .copilot-sidebar-container {
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .copilot-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  gap: 12px;
+  min-height: 100%;
 }
 
-/* Match Status card — fixed size */
-.copilot-sidebar > .glass-panel:nth-child(1) {
-  flex: 0 0 auto;
+/* All info cards get their natural height */
+.copilot-sidebar > .glass-panel {
+  flex-shrink: 0;
 }
 
-/* AI Health card — fixed size */
-.copilot-sidebar > .glass-panel:nth-child(2) {
-  flex: 0 0 auto;
-}
-
-/* Incident timeline card — can shrink, capped height */
-.copilot-sidebar > .glass-panel:nth-child(3) {
-  flex: 0 1 auto;
-  max-height: 100px;
-  overflow-y: auto;
-}
-
-/* Chat/Reports panel — fills ALL remaining space, no min-height */
+/* Chat/Reports panel — guaranteed usable height */
 .copilot-sidebar > .glass-panel:last-child {
-  flex: 1 1 0;
-  min-height: 0;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
