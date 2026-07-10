@@ -290,9 +290,11 @@ class StadiumSimulator:
             nearby_penalty = 0.0
             if zone_id.startswith("gate_"):
                 # Gates connected to concourses
-                if self.zones.get("concourse_north").status == "critical":
+                cn = self.zones.get("concourse_north")
+                if cn and cn.status == "critical":
                     nearby_penalty += 8.0
-                if self.zones.get("concourse_south").status == "critical":
+                cs = self.zones.get("concourse_south")
+                if cs and cs.status == "critical":
                     nearby_penalty += 8.0
             
             calculated_risk = base_risk + trend_penalty + hist_penalty - mitigation_bonus + nearby_penalty

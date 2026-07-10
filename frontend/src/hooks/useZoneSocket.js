@@ -8,12 +8,16 @@ export function useZoneSocket(url) {
 
   useEffect(() => {
     function connect() {
-      console.log(`Connecting to WebSocket: ${url}`);
+      if (import.meta.env.DEV) {
+        console.log(`Connecting to WebSocket: ${url}`);
+      }
       const socket = new WebSocket(url);
       socketRef.current = socket;
 
       socket.onopen = () => {
-        console.log("WebSocket connected.");
+        if (import.meta.env.DEV) {
+          console.log("WebSocket connected.");
+        }
         setIsConnected(true);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
@@ -31,7 +35,9 @@ export function useZoneSocket(url) {
       };
 
       socket.onclose = (event) => {
-        console.log("WebSocket closed. Attempting reconnect in 3s...", event.reason);
+        if (import.meta.env.DEV) {
+          console.log("WebSocket closed. Attempting reconnect in 3s...", event.reason);
+        }
         setIsConnected(false);
         socketRef.current = null;
         

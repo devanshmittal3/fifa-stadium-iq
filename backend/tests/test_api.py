@@ -147,3 +147,22 @@ def test_redirection_endpoints():
     deact_response = client.post("/api/simulation/redirection/deactivate/gate_c")
     assert deact_response.status_code == 200
     assert deact_response.json()["status"] == "redirection_deactivated"
+
+def test_invalid_simulation_stage():
+    response = client.post("/api/simulation/stage/invalid_stage_name")
+    assert response.status_code == 422
+
+def test_invalid_zone_id_spike():
+    response = client.post("/api/demo/spike/invalid_zone")
+    assert response.status_code == 404
+
+def test_invalid_redirection():
+    payload = {
+        "zone_id": "invalid_zone",
+        "alternative_routes": ["gate_b"]
+    }
+    response = client.post("/api/simulation/redirection/activate", json=payload)
+    assert response.status_code == 404
+    
+    response2 = client.post("/api/simulation/redirection/deactivate/invalid_zone")
+    assert response2.status_code == 404

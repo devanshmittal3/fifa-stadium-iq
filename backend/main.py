@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from typing import List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from models import (
     ZoneState, RecommendationResponse, ChatRequest, ChatResponse,
     DispatchPreviewRequest, DispatchPreviewResponse,
@@ -12,8 +13,12 @@ from models import (
     StageUpdateResponse, DemoModeUpdateResponse,
     RedirectionActivationResponse, RedirectionDeactivationResponse
 )
-from simulation import StadiumSimulator
+from simulation import StadiumSimulator, MATCH_STAGES
 from reasoning import ReasoningEngine
+
+class RedirectionRequest(BaseModel):
+    zone_id: str
+    alternative_routes: List[str]
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -71,7 +76,13 @@ app = FastAPI(
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For demo purposes, allow all origins
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://localhost:5174", 
+        "http://127.0.0.1:5173", 
+        "http://127.0.0.1:5174",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -135,11 +146,7 @@ async def post_dispatch_preview(request: DispatchPreviewRequest):
     )
     return DispatchPreviewResponse(**preview_data)
 
-from pydantic import BaseModel
 
-class RedirectionRequest(BaseModel):
-    zone_id: str
-    alternative_routes: List[str]
 
 @app.post("/api/demo/spike/{zone_id}", response_model=SpikeResponse)
 async def trigger_spike(zone_id: str):
@@ -185,6 +192,8 @@ async def get_simulation_state():
 @app.post("/api/simulation/stage/{stage_name}", response_model=StageUpdateResponse)
 async def set_simulation_stage(stage_name: str):
     """Updates the current active stage of the FIFA match lifecycle."""
+    if not any(s["stage"] == stage_name for s in MATCH_STAGES):
+        raise HTTPException(status_code=422, detail=f"Invalid stage name: {stage_name}")
     simulator.set_stage(stage_name)
     
     # Broadcast updated state immediately to all websockets
@@ -206,11 +215,15 @@ async def set_demo_mode(enabled: bool):
 @app.post("/api/simulation/redirection/activate", response_model=RedirectionActivationResponse)
 async def activate_redirection(req: RedirectionRequest):
     """Registers an active redirection route in the simulator to mitigate congestion."""
+    if req.zone_id not in simulator.zones:
+        raise HTTPException(status_code=404, detail=f"Zone {req.zone_id} not found")
     simulator.activate_redirection(req.zone_id, req.alternative_routes)
     return {"status": "redirection_activated", "zone_id": req.zone_id, "alternative_routes": req.alternative_routes}
 
 @app.post("/api/simulation/redirection/deactivate/{zone_id}", response_model=RedirectionDeactivationResponse)
 async def deactivate_redirection(zone_id: str):
     """Deactivates a redirection route in the simulator."""
+    if zone_id not in simulator.zones:
+        raise HTTPException(status_code=404, detail=f"Zone {zone_id} not found")
     simulator.deactivate_redirection(zone_id)
     return {"status": "redirection_deactivated", "zone_id": zone_id}

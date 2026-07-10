@@ -4,7 +4,8 @@ import logging
 from typing import List, Dict, Any, Optional, Tuple
 import anthropic
 import google.generativeai as genai
-from models import ZoneState, Recommendation, RecommendationResponse, ChatResponse
+from pydantic import ValidationError
+from models import ZoneState, Recommendation, RecommendationResponse, ChatResponse, DispatchPreviewResponse
 
 # Setup logger
 logging.basicConfig(level=logging.INFO)
@@ -96,7 +97,7 @@ class ReasoningEngine:
         response_obj = None
         if engine == "Claude":
             try:
-                client = anthropic.Anthropic(api_key=self.anthropic_key)
+                client = anthropic.Anthropic(api_key=self.anthropic_key, timeout=15.0)
                 response = client.messages.create(
                     model="claude-sonnet-4-6",
                     max_tokens=1500,
@@ -161,7 +162,7 @@ class ReasoningEngine:
                 model_name="gemini-2.5-flash",
                 system_instruction=system_instructions
             )
-            response = model.generate_content(f"Zone States: {json.dumps(zones_data)}")
+            response = model.generate_content(f"Zone States: {json.dumps(zones_data)}", request_options={"timeout": 15.0})
             raw_text = response.text.strip()
             
             if raw_text.startswith("```"):
@@ -327,7 +328,7 @@ class ReasoningEngine:
 
         if engine == "Claude":
             try:
-                client = anthropic.Anthropic(api_key=self.anthropic_key)
+                client = anthropic.Anthropic(api_key=self.anthropic_key, timeout=15.0)
                 response = client.messages.create(
                     model="claude-sonnet-4-6",
                     max_tokens=1200,
@@ -343,6 +344,8 @@ class ReasoningEngine:
                 
                 data = json.loads(raw_text)
                 data["engine"] = "Claude"
+                # Validate to safely fallback on malformed JSON
+                DispatchPreviewResponse(**data)
                 return data
             except Exception as e:
                 logger.warning(f"Claude dispatch preview failed, trying Gemini. Error: {str(e)}")
@@ -362,7 +365,7 @@ class ReasoningEngine:
                 model_name="gemini-2.5-flash",
                 system_instruction="You are a FIFA Stadium Operations Dispatch AI. Generate operator briefs, impact models, and natural translations in raw JSON."
             )
-            response = model.generate_content(prompt_str)
+            response = model.generate_content(prompt_str, request_options={"timeout": 15.0})
             raw_text = response.text.strip()
             if raw_text.startswith("```"):
                 raw_text = raw_text.split("```")[1]
@@ -372,6 +375,8 @@ class ReasoningEngine:
             
             data = json.loads(raw_text)
             data["engine"] = "Gemini"
+            # Validate to safely fallback on malformed JSON
+            DispatchPreviewResponse(**data)
             return data
         except Exception as e:
             reason = f"Gemini dispatch preview failure: {str(e)}"
@@ -455,7 +460,7 @@ class ReasoningEngine:
         
         if engine == "Claude":
             try:
-                client = anthropic.Anthropic(api_key=self.anthropic_key)
+                client = anthropic.Anthropic(api_key=self.anthropic_key, timeout=15.0)
                 # Format history for Claude
                 claude_messages = []
                 if history:
@@ -501,7 +506,7 @@ class ReasoningEngine:
             )
             # Compile conversation content
             prompt_content = f"Active Stadium Zones: {json.dumps(zones_data)}\n\nOperator message: {message}"
-            response = model.generate_content(prompt_content)
+            response = model.generate_content(prompt_content, request_options={"timeout": 15.0})
             raw_text = response.text.strip()
             
             if raw_text.startswith("```"):
