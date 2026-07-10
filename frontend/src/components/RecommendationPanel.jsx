@@ -246,7 +246,7 @@ export function RecommendationPanel({
                   </div>
                   
                   {/* Action recommendation */}
-                  <div className="rec-action" style={{ background: "rgba(0,0,0,0.25)", borderLeft: "3px solid var(--color-primary-light)", padding: "8px 10px", margin: "8px 0", borderRadius: "0 4px 4px 0", fontSize: "0.85rem", fontWeight: "600" }}>
+                  <div className="rec-action" style={{ background: "rgba(0,0,0,0.25)", borderLeft: "3px solid var(--color-primary-light)", padding: "8px 10px", margin: "8px 0", borderRadius: "0 4px 4px 0", fontSize: "0.85rem", fontWeight: "600", minHeight: "56px", display: "flex", alignItems: "center" }}>
                     {rec.action}
                   </div>
 
@@ -263,37 +263,37 @@ export function RecommendationPanel({
                     </div>
                     
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 14px", fontSize: "0.75rem" }}>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Current Occupancy:</span>
                         <strong style={{ color: "white" }}>{rec.current_occupancy?.toLocaleString()} spectators</strong>
                       </div>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Safe Capacity:</span>
                         <strong style={{ color: "white" }}>{rec.capacity?.toLocaleString()} spectators</strong>
                       </div>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Predicted Occupancy (5m):</span>
                         <strong style={{ color: "var(--color-danger)" }}>{Math.round(rec.predicted_pct_in_5min)}% Density</strong>
                       </div>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Congestion Growth:</span>
                         <strong style={{ color: rec.congestion_growth_pct > 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                           {rec.congestion_growth_pct > 0 ? "+" : ""}{rec.congestion_growth_pct}%/min
                         </strong>
                       </div>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Recommended Alternate:</span>
                         <strong style={{ color: "#00f0ff" }}>
                           {rec.alternative_routes?.map(r => r.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())).join(", ") || "N/A"}
                         </strong>
                       </div>
-                      <div>
+                      <div style={{ whiteSpace: "nowrap" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Expected Reduction:</span>
                         <strong style={{ color: "var(--color-success)" }}>{rec.expected_reduction_pct}% load</strong>
                       </div>
                       <div style={{ gridColumn: "span 2" }}>
                         <span style={{ color: "var(--color-text-muted)", display: "block", marginBottom: "2px" }}>Natural-Language Reasoning:</span>
-                        <div style={{ color: "var(--color-text-secondary)", lineHeight: "1.4", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "6px 8px", borderRadius: "4px", borderLeft: "2px solid #00b0ff" }}>
+                        <div style={{ color: "var(--color-text-secondary)", lineHeight: "1.4", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "6px 8px", borderRadius: "4px", borderLeft: "2px solid #00b0ff", minHeight: "56px" }}>
                           "{rec.reasoning}"
                         </div>
                       </div>
