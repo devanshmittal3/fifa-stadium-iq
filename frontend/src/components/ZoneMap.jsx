@@ -102,7 +102,7 @@ export function ZoneMap({
       
       <div className="panel-content" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <div className="map-canvas-container" role="application" aria-label="Stadium Connectivity Map">
-          <svg viewBox="0 0 600 480" className="stadium-svg">
+          <svg viewBox="0 65 600 355" className="stadium-svg">
             <defs>
               {/* Glow filter definition */}
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">

@@ -166,11 +166,11 @@ body {
 
 /* Cell constraints */
 .map-cell {
-  min-height: 560px; /* centerpiece map height on desktop */
+  min-height: 460px; /* centerpiece map height on desktop */
 }
 
 .decisions-cell {
-  min-height: 560px;
+  min-height: 460px;
 }
 
 .directory-cell {
