@@ -3,9 +3,8 @@ import { useZoneSocket } from "./hooks/useZoneSocket";
 import { ZoneMap } from "./components/ZoneMap";
 import { RecommendationPanel } from "./components/RecommendationPanel";
 import { ChatPanel } from "./components/ChatPanel";
-import { DemoControls } from "./components/DemoControls";
+import { OperationsControlCenter } from "./components/OperationsControlCenter";
 import { ZoneDetailTable } from "./components/ZoneDetailTable";
-import { DispatchHistoryPanel } from "./components/DispatchHistoryPanel";
 import { Dashboard } from "./components/Dashboard";
 import { AccessibilityControlCenter } from "./components/AccessibilityControlCenter";
 import "./styles.css";
@@ -621,22 +620,50 @@ function App() {
       )}
 
       {/* Main Grid Layout */}
-      <main className="dashboard-grid" style={{ gridTemplateRows: "1fr" }}>
-        {/* Left Column: Interactive Map, Demo Controls & Dispatch History */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", minHeight: "0" }}>
-          <div style={{ flex: 1.4, minHeight: "0" }}>
-            <ZoneMap
-              zones={zones}
-              selectedZoneId={selectedZoneId}
-              onSelectZone={setSelectedZoneId}
-              activeRedirections={activeRedirections}
-              predictionMode={predictionMode}
-              setPredictionMode={setPredictionMode}
-            />
-          </div>
-          <div style={{ flex: 0.8, display: "flex", gap: "16px" }}>
-            <div style={{ flex: 1 }}>
-              <DemoControls
+      <main className="dashboard-grid">
+        {/* Left Column: Operations Center (~70% width, scrollable) */}
+        <div className="operations-center">
+          <div className="operations-grid">
+            {/* Top Left: Interactive Stadium Map */}
+            <div className="op-cell map-cell">
+              <ZoneMap
+                zones={zones}
+                selectedZoneId={selectedZoneId}
+                onSelectZone={setSelectedZoneId}
+                activeRedirections={activeRedirections}
+                predictionMode={predictionMode}
+                setPredictionMode={setPredictionMode}
+              />
+            </div>
+
+            {/* Top Right: AI Operational Decisions */}
+            <div className="op-cell decisions-cell">
+              <RecommendationPanel
+                recommendations={finalRecommendations}
+                engine={recsEngine}
+                isLoading={isRecsLoading}
+                onRefresh={fetchRecommendations}
+                activeMatch={activeMatch}
+                activeRedirections={activeRedirections}
+                onDispatch={handleDispatchRedirection}
+                onDeactivate={handleDeactivateRedirection}
+                backendUrl={BACKEND_URL}
+              />
+            </div>
+
+            {/* Bottom Left: Live Zone Directory */}
+            <div className="op-cell directory-cell">
+              <ZoneDetailTable
+                zones={zones}
+                selectedZoneId={selectedZoneId}
+                onSelectZone={setSelectedZoneId}
+                activeRedirections={activeRedirections}
+              />
+            </div>
+
+            {/* Bottom Right: Simulation, Audit Trail & Replay Control Tabs */}
+            <div className="op-cell controls-cell">
+              <OperationsControlCenter
                 zones={zones}
                 onTriggerSpike={handleTriggerSpike}
                 onReset={handleReset}
@@ -644,44 +671,24 @@ function App() {
                 simulationState={simulationState}
                 onToggleDemoMode={handleToggleDemoMode}
                 onSetSimulationStage={handleSetSimulationStage}
-              />
-            </div>
-            <div style={{ flex: 1.2 }}>
-              <DispatchHistoryPanel
-                history={dispatchHistory}
-                onDeactivate={handleDeactivateRedirection}
+                dispatchHistory={dispatchHistory}
+                onDeactivateRedirection={handleDeactivateRedirection}
+                activeReplay={activeReplay}
+                onExitReplay={() => {
+                  setActiveReplay(null);
+                  setIsPlayingReplay(false);
+                }}
+                replayStep={replayStep}
+                setReplayStep={setReplayStep}
+                isPlayingReplay={isPlayingReplay}
+                setIsPlayingReplay={setIsPlayingReplay}
               />
             </div>
           </div>
         </div>
 
-        {/* Middle Column: Recommendations & Directory Table */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", minHeight: "0" }}>
-          <div style={{ flex: 1, minHeight: "0" }}>
-            <RecommendationPanel
-              recommendations={finalRecommendations}
-              engine={recsEngine}
-              isLoading={isRecsLoading}
-              onRefresh={fetchRecommendations}
-              activeMatch={activeMatch}
-              activeRedirections={activeRedirections}
-              onDispatch={handleDispatchRedirection}
-              onDeactivate={handleDeactivateRedirection}
-              backendUrl={BACKEND_URL}
-            />
-          </div>
-          <div style={{ flex: 1, minHeight: "0" }}>
-            <ZoneDetailTable
-              zones={zones}
-              selectedZoneId={selectedZoneId}
-              onSelectZone={setSelectedZoneId}
-              activeRedirections={activeRedirections}
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Multi-Tab Panel */}
-        <div style={{ minHeight: "0" }}>
+        {/* Right Column: AI Copilot Sidebar (~30% width, fixed height) */}
+        <div className="copilot-sidebar-container">
           <ChatPanel
             chatHistory={chatHistory}
             onSendMessage={handleSendMessage}
@@ -702,6 +709,11 @@ function App() {
             setReplayStep={setReplayStep}
             isPlayingReplay={isPlayingReplay}
             setIsPlayingReplay={setIsPlayingReplay}
+            activeMatch={activeMatch}
+            simulationState={simulationState}
+            isConnected={isConnected}
+            recsEngine={recsEngine}
+            zones={zones}
           />
         </div>
       </main>

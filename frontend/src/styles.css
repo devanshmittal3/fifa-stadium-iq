@@ -46,14 +46,15 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.15);
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: background 0.3s;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 176, 255, 0.35);
 }
 
 /* Layout */
@@ -61,8 +62,9 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 16px;
-  gap: 16px;
+  padding: 24px; /* 24px outer padding */
+  gap: 20px; /* 20px spacing between panels */
+  overflow: hidden; /* Prevent global scrollbar */
 }
 
 .header {
@@ -132,25 +134,97 @@ body {
   animation: pulse-glow-red 2s infinite;
 }
 
-/* Dashboard Grid */
+/* Dashboard Grid: 70% left, 30% right */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 7fr 3fr;
   flex: 1;
-  gap: 16px;
+  gap: 20px; /* 20px spacing between columns */
   min-height: 0; /* Important for inner scrolls */
+  overflow: hidden;
 }
 
+/* Left Column: Operations Center - scrollable */
+.operations-center {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px; /* Spacing for custom scrollbar */
+}
+
+/* 2x2 grid inside operations center */
+.operations-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr; /* centerpiece map gets wider column */
+  gap: 20px; /* 20px spacing between panels */
+}
+
+/* Right Column: AI Copilot Sidebar - fixed */
+.copilot-sidebar-container {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Cell constraints */
+.map-cell {
+  min-height: 560px; /* centerpiece map height on desktop */
+}
+
+.decisions-cell {
+  min-height: 560px;
+}
+
+.directory-cell {
+  min-height: 400px;
+}
+
+.controls-cell {
+  min-height: 400px;
+}
+
+/* Responsive design */
 @media (max-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    overflow-y: auto;
-    height: auto;
-  }
   .app-container {
     height: auto;
-    min-height: 100vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    overflow: visible;
+    gap: 20px;
+  }
+  .operations-center {
+    height: auto;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .operations-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .copilot-sidebar-container {
+    height: 650px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px;
+    gap: 12px;
+  }
+  .dashboard-grid {
+    gap: 12px;
+  }
+  .operations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .map-cell, .decisions-cell, .directory-cell, .controls-cell {
+    min-height: auto;
+  }
+  .copilot-sidebar-container {
+    height: 550px;
   }
 }
 
@@ -164,11 +238,17 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
 .panel-header {
-  padding: 16px 20px;
+  padding: 16px; /* 16px internal padding */
   border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -176,7 +256,7 @@ body {
 }
 
 .panel-header h2 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--color-text-primary);
   display: flex;
@@ -185,7 +265,7 @@ body {
 }
 
 .panel-content {
-  padding: 20px;
+  padding: 16px; /* 16px internal padding */
   flex: 1;
   overflow-y: auto;
   min-height: 0;
@@ -566,7 +646,7 @@ body {
 .demo-btn-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 12px;
 }
 
 .demo-action-btn {
